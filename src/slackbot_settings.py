@@ -1,9 +1,9 @@
 import env
 
-#REPO_SHOPPINGLIST = "hinoshiba/shopping_list"
-REPO_SHOPPINGLIST = "hinoshiba/Test"
-#CHANNEL_SHOPPINGLIST = "shoppinglist"
-CHANNEL_SHOPPINGLIST = "bot_test"
+REPO_SHOPPINGLIST = "hinoshiba/shopping_list"
+#REPO_SHOPPINGLIST = "hinoshiba/Test"
+CHANNEL_SHOPPINGLIST = "shoppinglist"
+#CHANNEL_SHOPPINGLIST = "bot_test"
 
 DEFAULT_REPLY = "その言葉の意味は知りません"
 
