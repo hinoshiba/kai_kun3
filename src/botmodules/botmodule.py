@@ -1,6 +1,7 @@
 from slackbot.bot import respond_to
 from slackbot.bot import listen_to
 from slackbot.bot import default_reply
+import time
 import slackbot_settings
 
 from github import Github
@@ -85,6 +86,7 @@ def op_list(message, state):
     g = Github(slackbot_settings.GITHUB_TOKEN)
     repo = g.get_repo(slackbot_settings.REPO_SHOPPINGLIST)
 
+    cnt = 0
     issues = repo.get_issues(state=state)
     for issue in issues:
         if is_destroy(issue):
@@ -101,7 +103,12 @@ def op_list(message, state):
         except AttributeError:
             pass
 
+        time.sleep(0.5)
         message.send(issue.title + location)
+        cnt += 1
+        if cnt >= 10:
+            time.sleep(1)
+            cnt = 0
 
     message.reply("以上！")
 
