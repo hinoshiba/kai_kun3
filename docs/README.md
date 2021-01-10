@@ -18,3 +18,6 @@ kai_kun3
 
 ### `#command`
 
+## other
+
+* [setup](ope/setup.md)

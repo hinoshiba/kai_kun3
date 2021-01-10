@@ -1,0 +1,12 @@
+[Unit]
+Description=kai (kai_kun3). Its family manager bot.
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/python3 /var/service/kai/src/run.py
+User=kai
+
+[Install]
+WantedBy=multi-user.target
