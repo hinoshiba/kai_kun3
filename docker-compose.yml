@@ -4,7 +4,7 @@ services:
         build: .
         tty: true
         environment:
-#            - http_proxy=${http_proxy}
-#            - https_proxy=${https_proxy}
+            - http_proxy=${http_proxy}
+            - https_proxy=${https_proxy}
             - slack_api_token=${slack_api_token}
             - github_api_token=${github_api_token}
