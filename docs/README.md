@@ -4,9 +4,9 @@ kai_kun3
 * つれづれなるままに動く家庭タスクのbotの情報一覧
 * 動作場所は、`ich1family.slack.com`
 
-## 命令リスト
+# 仕事一覧
 
-### `#shoppinglist`
+## チャンネル: `#shoppinglist`
 
 | 命令文(ja) | 命令文(en) | 簡単な説明 |
 | :---:  | :---: | :---: |
@@ -16,8 +16,8 @@ kai_kun3
 | `@kai 追加 <食材名>` | `@kai add <食材名>` | <食材名> をお買い物リストに追加します |
 | `@kai 済 <食材名>` | `@kai close <食材名>` | <食材名> が既にある場合は、買い物済みにします |
 
-### `#command`
+## チャンネル: `#command`
 
-## other
+# maintenance
 
 * [setup](ope/setup.md)

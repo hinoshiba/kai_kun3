@@ -1,12 +1,17 @@
 [Unit]
 Description=kai (kai_kun3). Its family manager bot.
+After=syslog.target
 After=network.target
+After=docker.service
 
 [Service]
 Type=simple
-Restart=always
-ExecStart=/usr/bin/python3 /var/service/kai/src/run.py
-User=kai
+WorkingDirectory=/var/service/kaikun3
+ExecStart=/usr/local/bin/docker-compose up --no-color
+Restart=on-success
+StandardOutput=syslog
+StandardError=syslog
+TimeoutStopSec=20
 
 [Install]
 WantedBy=multi-user.target
