@@ -15,6 +15,8 @@ setup
 		* `sudo systemctl enable kai.service`
 4. docker-composeのbuild
 	* `docker-compose down && docker-compose build`
+	* proxy
+		* `docker-compose down && docker-compose build --build-arg http_proxy=http://<proxy>:<port>/ --build-arg https_proxy=http://<proxy>:<port>/ kai_kun3`
 5. 起動と有効化
 	* `sudo systemctl start kai.service`
 
