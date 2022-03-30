@@ -2,7 +2,6 @@ from slackbot.bot import respond_to
 from slackbot.bot import listen_to
 from slackbot.bot import default_reply
 import time
-import random
 import slackbot_settings
 
 from github import Github
@@ -21,93 +20,12 @@ def dispacher(channel_name, default, message):
     if channel_name == slackbot_settings.CHANNEL_SHOPPINGLIST:
         shop_dispacher(default, message)
         return
-    elif channel_name == slackbot_settings.CHANNEL_MENURND:
-        menurand_dispacher(default, message)
-        return
     elif get_args(message)[0] == "help":
         message.reply("これを見な！: https://github.com/hinoshiba/kai_kun3/blob/master/docs/README.md")
 
     else:
         reply_unkown(message)
         return
-
-def menurand_dispacher(default, message):
-    if default:
-        search_menu(message, False)
-        return
-    search_menu(message, True)
-    return
-
-def search_menu(message, absolutely):
-    if absolutely:
-        message.send("その材料で作れるのは....")
-        time.sleep(0.5)
-    else:
-        message.send("その材料+アルファで作れるのは....")
-        time.sleep(0.5)
-
-    g = Github(slackbot_settings.GITHUB_TOKEN)
-    repo = g.get_repo(slackbot_settings.REPO_MENURND)
-
-    issues = []
-    kw = message.body['text']
-    if slackbot_settings.MAGICWORD in kw:
-        message.send("anyモードで探すぜ")
-        for word in kw.split():
-            issues.extend(repo.legacy_search_issues(state="open", keyword=word))
-    else:
-        issues.extend(repo.legacy_search_issues(state="open", keyword=kw))
-
-    checked = []
-    menues = []
-    for issue in issues:
-        if issue.number in checked:
-            continue
-        if issue.state != "open":
-            checked.append(issue.number)
-            continue
-        try:
-            name = issue.assignee.login
-        except:
-            checked.append(issue.number)
-            continue
-        if not name in slackbot_settings.TRUSTED_USERNAME:
-            checked.append(issue.number)
-            continue
-
-        url = slackbot_settings.URL_GITHUB + issue.url.replace('https://api.github.com/repos', '')
-        menu = issue.title + " : " + url
-        if absolutely:
-            match = True
-            for com in issue.get_comments():
-                c_user = com.user.login
-                if not c_user in slackbot_settings.TRUSTED_USERNAME:
-                    continue
-                if not com.body in kw:
-                    match = False
-                    break
-            if match:
-                menues.append(menu)
-
-            checked.append(issue.number)
-            continue
-        checked.append(issue.number)
-        menues.append(menu)
-
-    if len(menues) < 1:
-        message.send("....なにも...ない....。\n https://github.com/hinoshiba/iCH1f-menues/issues に、メニューを追加するんだ!!")
-        time.sleep(0.5)
-        return
-
-    for menu in random.sample(menues, len(menues)):
-        message.send(menu)
-        time.sleep(0.5)
-    message.send("....だぜ！")
-
-    if len(menues) < 2:
-        return
-    time.sleep(0.5)
-    message.send("今回のオレのおすすめは....\n" + random.choice(menues) + " だ！")
 
 def shop_dispacher(default, message):
     args = get_args(message)
