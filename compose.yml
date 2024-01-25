@@ -6,5 +6,7 @@ services:
         environment:
             - http_proxy=${http_proxy}
             - https_proxy=${https_proxy}
-            - slack_api_token=${slack_api_token}
+            - slack_bot_token=${slack_bot_token}
+            - slack_app_token=${slack_app_token}
+            - slack_bot_id=${slack_bot_id}
             - github_api_token=${github_api_token}

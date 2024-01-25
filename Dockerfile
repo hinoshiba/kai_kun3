@@ -1,4 +1,4 @@
-FROM python:3.9.10 AS builder
+FROM python:3.11.7 AS builder
 
 ENV LANG en_US.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
@@ -11,7 +11,7 @@ RUN apt-get update && \
 
 RUN pip3 install --upgrade pip && \
     pip3 install PyGithub && \
-    pip3 install slackbot
+    pip3 install slack_bolt
 
 ADD ./src /src
 

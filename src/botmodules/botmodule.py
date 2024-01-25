@@ -1,56 +1,66 @@
-from slackbot.bot import respond_to
-from slackbot.bot import listen_to
-from slackbot.bot import default_reply
 import time
 import slackbot_settings
+import re
+import traceback
 
 from github import Github
 
-@respond_to(r'^.*$')
-def response_run_dispacher(message):
-    channel_name = get_channelName(message)
-    dispacher(channel_name, False, message)
+def do_res(evt, say, msg):
+    say(text=msg, thread_ts=evt["ts"], channel=evt["channel"])
 
-@listen_to(r'^.*$')
-def listen_run_dispacher(message):
-    channel_name = get_channelName(message)
-    dispacher(channel_name, True, message)
+def reply_help(evt, say):
+    msg = "これを見な！: https://github.com/hinoshiba/kai_kun3/blob/master/docs/README.md"
+    do_res(evt, say, msg)
 
-def dispacher(channel_name, default, message):
-    if channel_name == slackbot_settings.CHANNEL_SHOPPINGLIST:
-        shop_dispacher(default, message)
-        return
-    elif get_args(message)[0] == "help":
-        message.reply("これを見な！: https://github.com/hinoshiba/kai_kun3/blob/master/docs/README.md")
+def reply_unkown(evt, say):
+    msg = 'undefined operation. show "@kai help"'
+    do_res(evt, say, msg)
 
-    else:
-        reply_unkown(message)
-        return
+def get_msg_without_slackid(evt):
+    return re.sub("<@\w+>\s*", "", evt["text"])
 
-def shop_dispacher(default, message):
-    args = get_args(message)
+def dispacher(app, evt, say, is_mention):
+    ch_info = app.client.conversations_info(channel=evt["channel"])
+    channel_name = ch_info["channel"]["name"]
 
-    if default:
-        if len(args) < 1:
-            message.reply("operation error.")
+    try:
+        if channel_name == slackbot_settings.CHANNEL_SHOPPINGLIST:
+            shop_dispacher(evt, say, is_mention)
             return
-        op_open(message, args[0])
+        if not(is_mention):
+            return
+        if get_msg_without_slackid(evt) == "help":
+            reply_help(evt, say)
+            return
+        reply_unkown(evt, say)
+    except Exception as e:
+        traceback.print_exc()
+        do_res(evt, say, "エラーが起きたから、もうダメぴょん。もう一回試してくれ...。")
+
+def shop_dispacher(evt, say, is_mention):
+    args = get_msg_without_slackid(evt).split()
+
+    if not(is_mention):
+        if len(args) < 1:
+            do_res(evt, say, "operation error.")
+            return
+        op_open(evt, say, args[0])
         return
 
     if args[0] in ["help"]:
-        message.reply("これを見な！: https://github.com/hinoshiba/kai_kun3/blob/master/docs/README.md")
+        reply_help(evt, say)
         return
 
     if args[0] in ["add", "追加"]:
         if len(args) < 2:
-            message.reply("operation error. USAGE: @kai add <食材名>")
+            do_res(evt, say, "operation error. USAGE: @kai add <食材名>")
             return
-        op_open(message, args[1])
+        op_open(evt, say, args[1])
         return
 
-    elif args[0] in ["list", "一覧"]:
+    if args[0] in ["list", "一覧"]:
         if len(args) < 2:
-            op_list(message, "open")
+            op_list(evt, say, "open")
             return
 
         state = ""
@@ -60,29 +70,29 @@ def shop_dispacher(default, message):
             state = "closed"
 
         if state == "":
-            message.reply("operation error. USAGE: @kai list [all|close]")
+            do_res(evt, say, "operation error. USAGE: @kai list [all|close]")
             return
 
-        op_list(message, state)
+        op_list(evt, say, state)
         return
 
-    elif args[0] in ["del", "削除"]:
+    if args[0] in ["del", "削除"]:
         if len(args) < 2:
-            message.reply("operation error. USAGE: @kai del <食材名>")
+            do_res(evt, say, "operation error. USAGE: @kai del <食材名>")
             return
-        op_del(message, args[1])
+        op_del(evt, say, args[1])
         return
 
-    elif args[0] in ["close", "済"]:
+    if args[0] in ["close", "済"]:
         if len(args) < 2:
-            message.reply("operation error. USAGE: @kai close <食材名>")
+            do_res(evt, say, "operation error. USAGE: @kai close <食材名>")
             return
-        op_close(message, args[1])
+        op_close(evt, say, args[1])
         return
 
-    reply_unkown(message)
+    reply_unkown(evt, say)
 
-def op_list(message, state):
+def op_list(evt, say, state):
     g = Github(slackbot_settings.GITHUB_TOKEN)
     repo = g.get_repo(slackbot_settings.REPO_SHOPPINGLIST)
 
@@ -104,15 +114,15 @@ def op_list(message, state):
             pass
 
         time.sleep(0.5)
-        message.send(issue.title + location)
+        do_res(evt, say, issue.title + location)
         cnt += 1
         if cnt >= 10:
             time.sleep(1)
             cnt = 0
 
-    message.reply("以上！")
+    do_res(evt, say, "以上！")
 
-def op_del(message, target):
+def op_del(evt, say, target):
     g = Github(slackbot_settings.GITHUB_TOKEN)
     repo = g.get_repo(slackbot_settings.REPO_SHOPPINGLIST)
 
@@ -121,12 +131,12 @@ def op_del(message, target):
         if issue.title != target:
             continue
         issue.edit(labels=['destroy'], state='closed')
-        message.reply('「' + target + '」を消したぜ！')
+        do_res(evt, say, '「' + target + '」を消したぜ！')
         return
 
-    message.reply('「' + target + '」？ そんなの消しようが無い！')
+    do_res(evt, say, '「' + target + '」？ そんなの消しようが無い！')
 
-def op_close(message, target):
+def op_close(evt, say, target):
     g = Github(slackbot_settings.GITHUB_TOKEN)
     repo = g.get_repo(slackbot_settings.REPO_SHOPPINGLIST)
 
@@ -135,7 +145,7 @@ def op_close(message, target):
         if issue.title != target:
             continue
         issue.edit(state='closed')
-        message.reply('「' + target + '」買った！')
+        do_res(evt, say, '「' + target + '」買った！')
         return
 
     closed_issues = repo.get_issues(state='closed')
@@ -143,12 +153,12 @@ def op_close(message, target):
         if issue.title != target:
             continue
 
-        message.reply('「' + target + '」もう買った！')
+        do_res(evt, say, '「' + target + '」もう買った！')
         return
 
-    message.reply('「' + target + '」？ そんなの無い！')
+    do_res(evt, say, '「' + target + '」？ そんなの無い！')
 
-def op_open(message, target):
+def op_open(evt, say, target):
     g = Github(slackbot_settings.GITHUB_TOKEN)
     repo = g.get_repo(slackbot_settings.REPO_SHOPPINGLIST)
 
@@ -156,7 +166,7 @@ def op_open(message, target):
     for issue in open_issues:
         if issue.title != target:
             continue
-        message.reply('「' + target + '」は、もう買う予定！')
+        do_res(evt, say, '「' + target + '」は、もう買う予定！')
         return
 
     closed_issues = repo.get_issues(state='closed')
@@ -169,26 +179,11 @@ def op_open(message, target):
             issue.edit(state='open')
         else:
             issue.edit(state='open')
-        message.reply('「' + target + '」を買う予定に変更！')
+        do_res(evt, say, '「' + target + '」を買う予定に変更！')
         return
 
     repo.create_issue(title=target)
-    message.reply('「' + target + '」を新しく買い物リストに追加！')
-
-def reply_unkown(message):
-    message.reply('undefined operation. show "@kai help"')
-
-def get_channelName(message):
-    try:
-        text = message.body['text']
-        channel = message.channel._client.channels[message.body['channel']]
-        return channel['name']
-    except:
-        return ""
-
-def get_args(message):
-    text = message.body['text']
-    return text.split()
+    do_res(evt, say, '「' + target + '」を新しく買い物リストに追加！')
 
 def is_destroy(issue):
     try:

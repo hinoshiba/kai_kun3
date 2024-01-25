@@ -7,6 +7,9 @@ CHANNEL_SHOPPINGLIST = "shoppinglist"
 
 DEFAULT_REPLY = "その言葉の意味は知りません"
 
-API_TOKEN = env.SlackApiToken
+SLACK_APP_TOKEN = env.SlackAppToken
+SLACK_BOT_TOKEN = env.SlackBotToken
+SLACK_BOT_ID = env.SlackBotId
+
 GITHUB_TOKEN = env.GithubApiToken
 PLUGINS = ['slackbot.plugins', 'botmodules']
